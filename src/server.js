@@ -1,15 +1,11 @@
 const express = require('express');
 const cors = require('cors');
 
-const createTables = require('./config/createTables');
 
-// Rotas
 
 const vendedorRoutes = require('./routes/vendedorRoutes'); 
 const produtoRoutes = require('./routes/produtoRoutes');   
 const pedidoRoutes = require('./routes/pedidoRoutes');    
-const afiliadoRoutes = require('./routes/pedidoRoutes');
-const afiliacaoProdutoRoutes = require('./routes/pedidoRoutes');
 const afiliadoRoutes = require('./routes/afiliadoRoutes');
 const afiliacaoProdutoRoutes = require('./routes/afiliacaoProdutoRoutes');
 const PORT = process.env.PORT || 3000;
@@ -25,7 +21,6 @@ app.use('/pedidos', pedidoRoutes);
 app.use('/afiliados', afiliadoRoutes);
 app.use('/afiliacoes-produto', afiliacaoProdutoRoutes);
 async function startServer() {
-  await createTables(); // garante que tabelas existem
   app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
 }
 
