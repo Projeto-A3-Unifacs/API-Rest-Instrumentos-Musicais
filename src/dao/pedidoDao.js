@@ -2,34 +2,143 @@ const pool = require('../config/Database');
 
 class PedidoDao {
   async getAll() {
-    const res = await pool.query('SELECT * FROM pedido');
+    const res = await pool.query(`
+      SELECT * FROM pedido
+      ORDER BY id_pedido
+    `);
+
     return res.rows;
   }
 
   async getById(id) {
-    const res = await pool.query('SELECT * FROM pedido WHERE id_pedido = $1', [id]);
-    return res.rows[0];
+    const pedido = await pool.query(`
+      SELECT * FROM pedido
+      WHERE id_pedido = $1
+    `, [id]);
+
+    if (!pedido.rows[0]) {
+      return null;
+    }
+
+    const itens = await pool.query(`
+      SELECT 
+        ip.id_item_pedido,
+        ip.id_produto,
+        p.nome AS produto,
+        ip.quantidade,
+        ip.preco_unitario
+      FROM item_pedido ip
+      JOIN produto p ON p.id_produto = ip.id_produto
+      WHERE ip.id_pedido = $1
+    `, [id]);
+
+    return {
+      ...pedido.rows[0],
+      itens: itens.rows
+    };
   }
 
   async create(pedido) {
-    const { id_usuario, total, status } = pedido;
-    const res = await pool.query(`
-      INSERT INTO pedido (id_usuario, total, status, data_pedido)
-      VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
-      RETURNING *
-    `, [id_usuario, total, status]);
-    return res.rows[0];
+    const client = await pool.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      const { id_usuario, status = 'REALIZADO', itens } = pedido;
+
+      if (!id_usuario) {
+        throw new Error('O campo id_usuario é obrigatório');
+      }
+
+      if (!itens || !Array.isArray(itens) || itens.length === 0) {
+        throw new Error('O pedido precisa ter pelo menos um item');
+      }
+
+      let valorTotal = 0;
+
+      for (const item of itens) {
+        const produto = await client.query(`
+          SELECT id_produto, preco, estoque
+          FROM produto
+          WHERE id_produto = $1
+        `, [item.id_produto]);
+
+        if (!produto.rows[0]) {
+          throw new Error(`Produto ${item.id_produto} não encontrado`);
+        }
+
+        if (produto.rows[0].estoque < item.quantidade) {
+          throw new Error(`Estoque insuficiente para o produto ${item.id_produto}`);
+        }
+
+        valorTotal += Number(produto.rows[0].preco) * Number(item.quantidade);
+      }
+
+      const pedidoCriado = await client.query(`
+        INSERT INTO pedido (id_usuario, valor_total, status, data_pedido)
+        VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
+        RETURNING *
+      `, [id_usuario, valorTotal, status]);
+
+      const idPedido = pedidoCriado.rows[0].id_pedido;
+
+      for (const item of itens) {
+        const produto = await client.query(`
+          SELECT preco
+          FROM produto
+          WHERE id_produto = $1
+        `, [item.id_produto]);
+
+        const precoUnitario = produto.rows[0].preco;
+
+        await client.query(`
+          INSERT INTO item_pedido 
+          (id_pedido, id_produto, quantidade, preco_unitario)
+          VALUES ($1, $2, $3, $4)
+        `, [
+          idPedido,
+          item.id_produto,
+          item.quantidade,
+          precoUnitario
+        ]);
+
+        await client.query(`
+          UPDATE produto
+          SET estoque = estoque - $1
+          WHERE id_produto = $2
+        `, [
+          item.quantidade,
+          item.id_produto
+        ]);
+      }
+
+      await client.query('COMMIT');
+
+      return this.getById(idPedido);
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 
   async update(id, data) {
+    const camposPermitidos = ['id_usuario', 'valor_total', 'status'];
     const fields = [];
     const values = [];
     let i = 1;
 
     for (const key in data) {
-      fields.push(`${key} = $${i}`);
-      values.push(data[key]);
-      i++;
+      if (camposPermitidos.includes(key)) {
+        fields.push(`${key} = $${i}`);
+        values.push(data[key]);
+        i++;
+      }
+    }
+
+    if (fields.length === 0) {
+      throw new Error('Nenhum campo válido para atualizar');
     }
 
     values.push(id);
@@ -42,6 +151,62 @@ class PedidoDao {
     `, values);
 
     return res.rows[0];
+  }
+
+  async cancelar(id) {
+    const client = await pool.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      const pedido = await client.query(`
+        SELECT *
+        FROM pedido
+        WHERE id_pedido = $1
+      `, [id]);
+
+      if (!pedido.rows[0]) {
+        await client.query('ROLLBACK');
+        return null;
+      }
+
+      if (pedido.rows[0].status === 'CANCELADO') {
+        throw new Error('Este pedido já está cancelado');
+      }
+
+      const itens = await client.query(`
+        SELECT id_produto, quantidade
+        FROM item_pedido
+        WHERE id_pedido = $1
+      `, [id]);
+
+      for (const item of itens.rows) {
+        await client.query(`
+          UPDATE produto
+          SET estoque = estoque + $1
+          WHERE id_produto = $2
+        `, [
+          item.quantidade,
+          item.id_produto
+        ]);
+      }
+
+      const pedidoCancelado = await client.query(`
+        UPDATE pedido
+        SET status = 'CANCELADO'
+        WHERE id_pedido = $1
+        RETURNING *
+      `, [id]);
+
+      await client.query('COMMIT');
+
+      return pedidoCancelado.rows[0];
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 
   async delete(id) {
