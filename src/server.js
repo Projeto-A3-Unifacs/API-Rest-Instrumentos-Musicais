@@ -8,6 +8,7 @@ const produtoRoutes = require('./routes/produtoRoutes');
 const pedidoRoutes = require('./routes/pedidoRoutes');    
 const afiliadoRoutes = require('./routes/afiliadoRoutes');
 const afiliacaoProdutoRoutes = require('./routes/afiliacaoProdutoRoutes');
+const relatorioRoutes = require('./routes/relatorioRoutes');
 const PORT = process.env.PORT || 3000;
 const app = express();
 
@@ -20,6 +21,7 @@ app.use('/produtos', produtoRoutes);
 app.use('/pedidos', pedidoRoutes);
 app.use('/afiliados', afiliadoRoutes);
 app.use('/afiliacoes-produto', afiliacaoProdutoRoutes);
+app.use('/relatorios', relatorioRoutes);
 async function startServer() {
   app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
 }
