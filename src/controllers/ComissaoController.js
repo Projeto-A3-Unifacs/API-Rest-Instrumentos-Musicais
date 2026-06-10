@@ -5,7 +5,7 @@ class ComissaoController {
   // GET todas as comissões – apenas vendedores
   async getAll(req, res) {
     try {
-      if (req.user.role !== 'vendedor') {
+      if (req.user.role !== Vendedor) {
         return res.status(403).json({ erro: 'Acesso negado' });
       }
 
@@ -20,7 +20,7 @@ class ComissaoController {
   // GET comissão por ID – apenas vendedores
   async getById(req, res) {
     try {
-      if (req.user.role !== 'vendedor') {
+      if (req.user.role !== Vendedor) {
         return res.status(403).json({ erro: 'Acesso negado' });
       }
 
@@ -41,7 +41,7 @@ class ComissaoController {
   // POST criar comissão – apenas vendedores
   async create(req, res) {
     try {
-      if (req.user.role !== 'vendedor') {
+      if (req.user.role !== Vendedor) {
         return res.status(403).json({ erro: 'Acesso negado' });
       }
 
@@ -66,7 +66,7 @@ class ComissaoController {
   // PATCH aprovar/reprovar comissão – apenas vendedores
   async updateStatus(req, res) {
     try {
-      if (req.user.role !== 'vendedor') {
+      if (req.user.role !== Vendedor) {
         return res.status(403).json({ erro: 'Acesso negado' });
       }
 

@@ -6,7 +6,7 @@ class SaqueController {
   // GET todos os saques – apenas vendedores
   async getAll(req, res) {
     try {
-      if (req.user.role !== 'vendedor') {
+      if (req.user.role !== Vendedor) {
         return res.status(403).json({ erro: 'Acesso negado' });
       }
 
@@ -28,7 +28,7 @@ class SaqueController {
         return res.status(404).json({ erro: 'Saque não encontrado' });
       }
 
-      if (req.user.role === 'cliente' && saque.id_usuario !== req.user.id) {
+      if (req.user.role === 'Cliente' && saque.id_usuario !== req.user.id) {
         return res.status(403).json({ erro: 'Acesso negado' });
       }
 
@@ -42,7 +42,7 @@ class SaqueController {
   // POST criar saque – apenas clientes
   async create(req, res) {
     try {
-      if (req.user.role !== 'cliente') {
+      if (req.user.role !== 'Cliente') {
         return res.status(403).json({ erro: 'Apenas clientes podem criar saques' });
       }
 
@@ -73,7 +73,7 @@ class SaqueController {
   // PATCH aprovar/reprovar saque – apenas vendedores
   async updateStatus(req, res) {
     try {
-      if (req.user.role !== 'vendedor') {
+      if (req.user.role !== Vendedor) {
         return res.status(403).json({ erro: 'Apenas vendedores podem aprovar/reprovar saques' });
       }
 

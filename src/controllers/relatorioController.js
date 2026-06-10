@@ -4,7 +4,7 @@ class RelatorioController {
   // GET produtos mais vendidos – apenas vendedores
   async produtosMaisVendidos(req, res) {
     try {
-      if (req.user.role !== 'vendedor') {
+      if (req.user.role !== Vendedor) {
         return res.status(403).json({ erro: 'Acesso negado' });
       }
 
@@ -20,7 +20,7 @@ class RelatorioController {
   // GET produto por cliente – apenas vendedores
   async produtoPorCliente(req, res) {
     try {
-      if (req.user.role !== 'vendedor') {
+      if (req.user.role !== Vendedor) {
         return res.status(403).json({ erro: 'Acesso negado' });
       }
 
@@ -36,7 +36,7 @@ class RelatorioController {
   // GET consumo médio do cliente – apenas vendedores
   async consumoMedioCliente(req, res) {
     try {
-      if (req.user.role !== 'vendedor') {
+      if (req.user.role !== Vendedor) {
         return res.status(403).json({ erro: 'Acesso negado' });
       }
 
@@ -52,7 +52,7 @@ class RelatorioController {
   // GET produtos com baixo estoque – apenas vendedores
   async produtosBaixoEstoque(req, res) {
     try {
-      if (req.user.role !== 'vendedor') {
+      if (req.user.role !== Vendedor) {
         return res.status(403).json({ erro: 'Acesso negado' });
       }
 

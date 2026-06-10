@@ -5,7 +5,7 @@ class AfiliadoController {
   // GET todos afiliados – apenas vendedores
   async getAll(req, res) {
     try {
-      if (req.user.role !== 'vendedor') {
+      if (req.user.role !== Vendedor) {
         return res.status(403).json({ erro: 'Acesso negado' });
       }
 
@@ -25,7 +25,7 @@ class AfiliadoController {
 
       if (!afiliado) return res.status(404).json({ erro: 'Afiliado não encontrado' });
 
-      if (req.user.role === 'cliente' && afiliado.id_usuario !== req.user.id) {
+      if (req.user.role === 'Cliente' && afiliado.id_usuario !== req.user.id) {
         return res.status(403).json({ erro: 'Acesso negado' });
       }
 
@@ -39,7 +39,7 @@ class AfiliadoController {
   // POST criar afiliado – apenas clientes podem criar sua afiliação
   async create(req, res) {
     try {
-      if (req.user.role !== 'cliente') {
+      if (req.user.role !== 'Cliente') {
         return res.status(403).json({ erro: 'Apenas clientes podem se tornar afiliados' });
       }
 
@@ -61,7 +61,7 @@ class AfiliadoController {
   // PATCH aprovar/reprovar – apenas vendedores
   async updateStatus(req, res) {
     try {
-      if (req.user.role !== 'vendedor') {
+      if (req.user.role !== Vendedor) {
         return res.status(403).json({ erro: 'Apenas vendedores podem aprovar/reprovar' });
       }
 
@@ -79,7 +79,7 @@ class AfiliadoController {
   // DELETE afiliado – apenas vendedores
   async delete(req, res) {
     try {
-      if (req.user.role !== 'vendedor') {
+      if (req.user.role !== Vendedor) {
         return res.status(403).json({ erro: 'Apenas vendedores podem remover afiliados' });
       }
 

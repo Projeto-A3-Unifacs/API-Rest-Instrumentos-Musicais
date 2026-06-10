@@ -1,4 +1,4 @@
-const pool = require('../config/dtabase');
+const pool = require('../config/Database');
 
 class SaqueDAO {
 

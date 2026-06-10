@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const { generateToken } = require('../config/jwt');
-const { getUserByEmail } = require('../dao/usuarioDao');
+const { getUserByEmail } = require('../dao/vendedorDao');
 
 async function login(req, res) {
   const { email, senha } = req.body;

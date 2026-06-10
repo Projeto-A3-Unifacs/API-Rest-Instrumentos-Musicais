@@ -1,12 +1,12 @@
 const carteiraDAO = require('../dao/CarteiraDAO');
-const usuarioDAO = require('../dao/usuarioDao');
+const vendedorDao = require('../dao/vendedorDao');
 
 class CarteiraController {
 
   // GET todas as carteiras – apenas vendedores
   async getAll(req, res) {
     try {
-      if (req.user.role !== 'vendedor') {
+      if (req.user.role !== Vendedor) {
         return res.status(403).json({ erro: 'Acesso negado' });
       }
 
@@ -29,7 +29,7 @@ class CarteiraController {
       }
 
       // Clientes só podem acessar sua própria carteira
-      if (req.user.role === 'cliente' && carteira.id_usuario !== req.user.id) {
+      if (req.user.role === 'Cliente' && carteira.id_usuario !== req.user.id) {
         return res.status(403).json({ erro: 'Acesso negado' });
       }
 
@@ -43,14 +43,14 @@ class CarteiraController {
   // POST criar carteira – apenas clientes podem criar a própria
   async create(req, res) {
     try {
-      if (req.user.role !== 'cliente') {
+      if (req.user.role !== 'Cliente') {
         return res.status(403).json({ erro: 'Apenas clientes podem criar carteira' });
       }
 
       // Sempre criar carteira para o usuário logado, ignorando id_usuario do body
       const id_usuario = req.user.id;
 
-      const usuario = await usuarioDAO.getById(id_usuario);
+      const usuario = await vendedorDao.getById(id_usuario);
       if (!usuario) {
         return res.status(404).json({ erro: 'Usuário não encontrado' });
       }
@@ -71,7 +71,7 @@ class CarteiraController {
   // DELETE carteira – apenas vendedores podem remover
   async delete(req, res) {
     try {
-      if (req.user.role !== 'vendedor') {
+      if (req.user.role !== Vendedor) {
         return res.status(403).json({ erro: 'Apenas vendedores podem remover carteiras' });
       }
 

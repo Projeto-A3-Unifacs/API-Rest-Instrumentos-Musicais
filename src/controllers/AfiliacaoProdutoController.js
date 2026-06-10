@@ -24,7 +24,7 @@ class AfiliacaoProdutoController {
       }
 
       // se cliente, só pode ver se for o próprio afiliado
-      if (req.user.role === 'cliente' && afiliacao.id_afiliado !== req.user.id) {
+      if (req.user.role === 'Cliente' && afiliacao.id_afiliado !== req.user.id) {
         return res.status(403).json({ erro: 'Acesso negado' });
       }
 
@@ -37,7 +37,7 @@ class AfiliacaoProdutoController {
   // POST solicitar afiliação – apenas clientes não afiliados
   async create(req, res) {
     try {
-      if (req.user.role !== 'cliente') {
+      if (req.user.role !== 'Cliente') {
         return res.status(403).json({ erro: 'Apenas clientes podem solicitar afiliação' });
       }
 
@@ -59,7 +59,7 @@ class AfiliacaoProdutoController {
   // PATCH aprovar/reprovar – apenas vendedores
   async updateStatus(req, res) {
     try {
-      if (req.user.role !== 'vendedor') {
+      if (req.user.role !== Vendedor) {
         return res.status(403).json({ erro: 'Apenas vendedores podem aprovar/reprovar' });
       }
 
@@ -76,7 +76,7 @@ class AfiliacaoProdutoController {
   // DELETE afiliação – apenas vendedores
   async delete(req, res) {
     try {
-      if (req.user.role !== 'vendedor') {
+      if (req.user.role !== Vendedor) {
         return res.status(403).json({ erro: 'Apenas vendedores podem remover afiliações' });
       }
 

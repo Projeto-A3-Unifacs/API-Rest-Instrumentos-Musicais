@@ -50,107 +50,93 @@ class PedidoController {
   }
 
   async create(req, res) {
-
     try {
-
-      const {
-        id_endereco,
-        itens
-      } = req.body;
+      const { id_endereco, itens } = req.body;
 
       if (!id_endereco) {
-        return res.status(400).json({
-          error: 'id_endereco é obrigatório'
-        });
+        return res.status(400).json({ error: 'id_endereco é obrigatório' });
       }
 
-      const endereco =
-        await EnderecoDAO.getById(id_endereco);
-
+      const endereco = await EnderecoDAO.getById(id_endereco);
       if (!endereco) {
-        return res.status(404).json({
-          error: 'Endereço não encontrado'
-        });
+        return res.status(404).json({ error: 'Endereço não encontrado' });
       }
 
       if (!itens || itens.length === 0) {
-        return res.status(400).json({
-          error: 'Pedido precisa possuir itens'
+        return res.status(400).json({ error: 'Pedido precisa possuir itens' });
+      }
+
+      let valorFreteTotal = 0;
+      const fretesCalculados = [];
+
+      for (const item of itens) {
+        const dadosFrete = await FreteDao.getDadosFrete(item.id_produto, id_endereco);
+
+        if (!dadosFrete) {
+          return res.status(400).json({ 
+            error: `Não foi possível calcular o frete para o produto ID ${item.id_produto}` 
+          });
+        }
+
+        let valorFreteItem = 0;
+        let prazoDiasItem = 0;
+
+        if (
+          dadosFrete.cidade_empresa === dadosFrete.cidade_cliente &&
+          dadosFrete.estado_empresa === dadosFrete.estado_cliente
+        ) {
+          valorFreteItem = 15;
+          prazoDiasItem = 2;
+        } else if (dadosFrete.estado_empresa === dadosFrete.estado_cliente) {
+          valorFreteItem = 25;
+          prazoDiasItem = 5;
+        } else {
+          valorFreteItem = 40;
+          prazoDiasItem = 10;
+        }
+
+        const custoFreteDesteItem = valorFreteItem * item.quantidade;
+        
+        valorFreteTotal += custoFreteDesteItem;
+
+        fretesCalculados.push({
+          valor: custoFreteDesteItem,
+          prazo_dias: prazoDiasItem,
+          cidade_empresa: dadosFrete.cidade_empresa,
+          estado_empresa: dadosFrete.estado_empresa,
+          cidade_cliente: dadosFrete.cidade_cliente,
+          estado_cliente: dadosFrete.estado_cliente
         });
       }
 
-      const primeiroProduto =
-        itens[0].id_produto;
+      const novoPedido = await PedidoDao.create({
+        ...req.body,
+        valor_frete: valorFreteTotal
+      });
 
-      const dadosFrete =
-        await FreteDao.getDadosFrete(
-          primeiroProduto,
-          id_endereco
+      for (const frete of fretesCalculados) {
+        await FreteDao.create(
+          novoPedido.id_pedido,
+          frete.valor,
+          frete.prazo_dias,
+          frete.cidade_empresa,
+          frete.estado_empresa,
+          frete.cidade_cliente,
+          frete.estado_cliente
         );
-
-      if (!dadosFrete) {
-        return res.status(400).json({
-          error: 'Não foi possível calcular o frete'
-        });
       }
-
-      let valorFrete = 0;
-      let prazoDias = 0;
-
-      if (
-        dadosFrete.cidade_empresa === dadosFrete.cidade_cliente &&
-        dadosFrete.estado_empresa === dadosFrete.estado_cliente
-      ) {
-
-        valorFrete = 15;
-        prazoDias = 2;
-
-      } else if (
-        dadosFrete.estado_empresa === dadosFrete.estado_cliente
-      ) {
-
-        valorFrete = 25;
-        prazoDias = 5;
-
-      } else {
-
-        valorFrete = 40;
-        prazoDias = 10;
-
-      }
-
-      const novoPedido =
-        await PedidoDao.create({
-          ...req.body,
-          valor_frete: valorFrete
-        });
-
-      await FreteDao.create(
-        novoPedido.id_pedido,
-        valorFrete,
-        prazoDias,
-        dadosFrete.cidade_empresa,
-        dadosFrete.estado_empresa,
-        dadosFrete.cidade_cliente,
-        dadosFrete.estado_cliente
-      );
 
       res.status(201).json({
         pedido: novoPedido,
-        frete: {
-          valor: valorFrete,
-          prazo_dias: prazoDias
+        resumo_frete: {
+          total_frete: valorFreteTotal,
+          pacotes: fretesCalculados.length
         }
       });
 
     } catch (error) {
-
       console.error('Erro ao criar pedido:', error);
-
-      res.status(400).json({
-        error: error.message
-      });
-
+      res.status(400).json({ error: error.message });
     }
   }
 

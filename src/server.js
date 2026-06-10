@@ -16,6 +16,8 @@ const carteiraRoutes = require('./routes/carteiraRoutes');
 const comissaoRoutes = require('./routes/comissaoRoutes');
 const enderecoRoutes = require('./routes/enderecoRoutes');
 const saqueRoutes = require('./routes/saqueRoutes');
+const freteRoutes = require('./routes/freteRoutes');
+const clienteRoutes= require('./routes/clienteRoutes');
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -25,10 +27,11 @@ app.use(cors());
 app.use(express.json());
 
 // Rotas públicas
-app.use('/api/auth', authRoutes); // login não precisa de token
+app.use('/api/auth', authRoutes); 
 
 // Rotas protegidas – todas exigem autenticação JWT
 app.use('/vendedores', authenticate, vendedorRoutes);
+app.use('/clientes', clienteRoutes)
 app.use('/produtos', authenticate, produtoRoutes);
 app.use('/pedidos', authenticate, pedidoRoutes);
 app.use('/afiliados', authenticate, afiliadoRoutes);
@@ -38,6 +41,7 @@ app.use('/carteira', authenticate, carteiraRoutes);
 app.use('/comissao', authenticate, comissaoRoutes);
 app.use('/endereco', authenticate, enderecoRoutes);
 app.use('/saque', authenticate, saqueRoutes);
+app.use('/fretes', freteRoutes);
 
 // Iniciar servidor
 app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));

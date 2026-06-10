@@ -1,7 +1,7 @@
 const pool = require('../config/Database');
 const bcrypt = require('bcryptjs');
 
-class UsuarioDao {
+class vendedorDao {
   async getAll() {
     const res = await pool.query(`
       SELECT u.*, e.id_empresa, e.nome_fantasia, e.cnpj
@@ -84,4 +84,4 @@ class UsuarioDao {
   }
 }
 
-module.exports = new UsuarioDao();
+module.exports = new vendedorDao();

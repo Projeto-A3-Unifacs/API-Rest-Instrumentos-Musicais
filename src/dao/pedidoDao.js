@@ -44,7 +44,8 @@ class PedidoDao {
     try {
       await client.query('BEGIN');
 
-      const { id_usuario, status = 'REALIZADO', itens } = pedido;
+    
+      const { id_usuario, status = 'REALIZADO', itens, valor_frete = 0 } = pedido;
 
       if (!id_usuario) {
         throw new Error('O campo id_usuario é obrigatório');
@@ -53,14 +54,14 @@ class PedidoDao {
       if (!itens || !Array.isArray(itens) || itens.length === 0) {
         throw new Error('O pedido precisa ter pelo menos um item');
       }
-
-      let valorTotal = 0;
+      let valorTotal = Number(valor_frete);
 
       for (const item of itens) {
         const produto = await client.query(`
           SELECT id_produto, preco, estoque
           FROM produto
           WHERE id_produto = $1
+          FOR UPDATE
         `, [item.id_produto]);
 
         if (!produto.rows[0]) {

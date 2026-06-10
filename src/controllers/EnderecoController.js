@@ -1,12 +1,12 @@
 const enderecoDAO = require('../dao/EnderecoDAO');
-const usuarioDAO = require('../dao/UsuarioDAO');
+const vendedorDao = require('../dao/vendedorDao');
 
 class EnderecoController {
 
   // GET todos os endereços – apenas vendedores
   async getAll(req, res) {
     try {
-      if (req.user.role !== 'vendedor') {
+      if (req.user.role !== Vendedor) {
         return res.status(403).json({ erro: 'Acesso negado' });
       }
 
@@ -26,7 +26,7 @@ class EnderecoController {
 
       if (!endereco) return res.status(404).json({ erro: 'Endereço não encontrado' });
 
-      if (req.user.role === 'cliente' && endereco.id_usuario !== req.user.id) {
+      if (req.user.role === 'Cliente' && endereco.id_usuario !== req.user.id) {
         return res.status(403).json({ erro: 'Acesso negado' });
       }
 
@@ -42,7 +42,7 @@ class EnderecoController {
     try {
       const { idUsuario } = req.params;
 
-      if (req.user.role === 'cliente' && Number(idUsuario) !== req.user.id) {
+      if (req.user.role === 'Cliente' && Number(idUsuario) !== req.user.id) {
         return res.status(403).json({ erro: 'Acesso negado' });
       }
 
@@ -57,13 +57,13 @@ class EnderecoController {
   // POST criar endereço – apenas clientes podem criar para si
   async create(req, res) {
     try {
-      if (req.user.role !== 'cliente') {
+      if (req.user.role !== 'Cliente') {
         return res.status(403).json({ erro: 'Apenas clientes podem criar endereço' });
       }
 
       const id_usuario = req.user.id; // força criar para o usuário logado
 
-      const usuario = await usuarioDAO.getById(id_usuario);
+      const usuario = await vendedorDao.getById(id_usuario);
       if (!usuario) return res.status(404).json({ erro: 'Usuário não encontrado' });
 
       const endereco = await enderecoDAO.create(
@@ -92,7 +92,7 @@ class EnderecoController {
 
       if (!enderecoExistente) return res.status(404).json({ erro: 'Endereço não encontrado' });
 
-      if (req.user.role === 'cliente' && enderecoExistente.id_usuario !== req.user.id) {
+      if (req.user.role === 'Cliente' && enderecoExistente.id_usuario !== req.user.id) {
         return res.status(403).json({ erro: 'Acesso negado' });
       }
 
@@ -107,7 +107,7 @@ class EnderecoController {
   // DELETE endereço – apenas vendedores podem deletar qualquer endereço
   async delete(req, res) {
     try {
-      if (req.user.role !== 'vendedor') {
+      if (req.user.role !== Vendedor) {
         return res.status(403).json({ erro: 'Apenas vendedores podem remover endereços' });
       }
 

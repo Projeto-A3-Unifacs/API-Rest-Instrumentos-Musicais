@@ -155,7 +155,7 @@ async function seedInitialData() {
   try {
     // ---------- Perfis ----------
     const perfis = [
-      { id_perfil: 1, nome: 'Vendedor' }, // Empresas
+      { id_perfil: 1, nome: Vendedor }, // Empresas
       { id_perfil: 2, nome: 'Cliente' }   // Usuários
     ];
 
