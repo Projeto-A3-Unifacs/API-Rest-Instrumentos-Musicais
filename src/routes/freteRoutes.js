@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const freteController = require('../controllers/FreteController');
+const { authenticate, authorize } = require('../middleware/auth');
 
 router.get('/', authenticate, freteController.getAll.bind(freteController));
 router.get('/:id', authenticate, freteController.getById.bind(freteController));

@@ -1,10 +1,12 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+const { swaggerUi, swaggerDocs } = require('./config/swagger');
 
 const { authenticate } = require('./middleware/auth');
-
+//http://localhost:3000/api-docs
 // Rotas
+
 const authRoutes = require('./routes/authRoutes'); // login público
 const vendedorRoutes = require('./routes/vendedorRoutes');
 const produtoRoutes = require('./routes/produtoRoutes');
@@ -28,7 +30,7 @@ const app = express();
 // Middlewares globais
 app.use(cors());
 app.use(express.json());
-
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 // Rotas públicas
 app.use('/api/auth', authRoutes); 
 
