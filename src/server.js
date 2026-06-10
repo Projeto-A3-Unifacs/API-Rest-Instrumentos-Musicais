@@ -18,6 +18,9 @@ const enderecoRoutes = require('./routes/enderecoRoutes');
 const saqueRoutes = require('./routes/saqueRoutes');
 const freteRoutes = require('./routes/freteRoutes');
 const clienteRoutes= require('./routes/clienteRoutes');
+const pagamentoRoutes = require('./routes/pagamentoRoutes');
+const carrinhoRoutes= require('./routes/carrinhoRoutes');
+const empresaRoutes= require('./routes/empresaRoutes');
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -41,7 +44,10 @@ app.use('/carteira', authenticate, carteiraRoutes);
 app.use('/comissao', authenticate, comissaoRoutes);
 app.use('/endereco', authenticate, enderecoRoutes);
 app.use('/saque', authenticate, saqueRoutes);
-app.use('/fretes', freteRoutes);
+app.use('/fretes',authenticate, freteRoutes);
+app.use('/pagamentos',authenticate, pagamentoRoutes );
+app.use('/empresas',authenticate,empresaRoutes);
+app.use('/carrinhos',authenticate,carrinhoRoutes);
 
 // Iniciar servidor
 app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));

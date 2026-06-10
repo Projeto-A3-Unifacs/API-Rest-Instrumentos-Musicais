@@ -4,15 +4,15 @@ const saqueController = require('../controllers/SaqueController');
 const { authenticate, authorize } = require('../middleware/auth');
 
 // GET todos os saques – apenas vendedores
-router.get('/', authenticate, authorize('Vendedor'), saqueController.getAll.bind(saqueController));
+router.get('/', authenticate, authorize('Vendedor', 'Administrador'), saqueController.getAll.bind(saqueController));
 
 // GET saque por ID – clientes acessam apenas o próprio, vendedores qualquer
-router.get('/:id', authenticate, authorize('Cliente', 'Vendedor'), saqueController.getById.bind(saqueController));
+router.get('/:id', authenticate, authorize('Cliente', 'Vendedor', 'Administrador'), saqueController.getById.bind(saqueController));
 
 // POST criar saque – apenas clientes
-router.post('/', authenticate, authorize('Cliente'), saqueController.create.bind(saqueController));
+router.post('/', authenticate, authorize('Cliente', 'Administrador'), saqueController.create.bind(saqueController));
 
 // PATCH aprovar/reprovar saque – apenas vendedores
-router.patch('/:id/status', authenticate, authorize('Vendedor'), saqueController.updateStatus.bind(saqueController));
+router.patch('/:id/status', authenticate, authorize('Vendedor', 'Administrador'), saqueController.updateStatus.bind(saqueController));
 
 module.exports = router;
