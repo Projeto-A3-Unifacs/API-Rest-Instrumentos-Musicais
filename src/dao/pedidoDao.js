@@ -1,15 +1,20 @@
 const pool = require('../config/Database');
 
 class PedidoDao {
-  async getAll() {
-    const res = await pool.query(`
-      SELECT * FROM pedido
-      ORDER BY id_pedido
-    `);
+async getAll(idUsuario = null) {
+    let query = 'SELECT * FROM pedido';
+    const values = [];
 
+    if (idUsuario) {
+      query += ' WHERE id_usuario = $1';
+      values.push(idUsuario);
+    }
+
+    query += ' ORDER BY id_pedido DESC';
+
+    const res = await pool.query(query, values);
     return res.rows;
   }
-
 
 
  async getVendedorByPedido(idPedido) {
@@ -75,13 +80,13 @@ async getById(id) {
     };
   }
 
-  async create(pedido) {
+ async create(pedido) {
     const client = await pool.connect();
 
     try {
       await client.query('BEGIN');
 
-      const { id_usuario, status = 'REALIZADO', itens, id_afiliacao } = pedido;
+      const { id_usuario, status = 'REALIZADO', itens, id_afiliacao, valor_frete = 0 } = pedido;
 
       if (!id_usuario) {
         throw new Error('O campo id_usuario é obrigatório');
@@ -111,6 +116,8 @@ async getById(id) {
         valorTotal += Number(produto.rows[0].preco) * Number(item.quantidade);
       }
 
+      valorTotal += Number(valor_frete);
+
       const pedidoCriado = await client.query(`
         INSERT INTO pedido (id_usuario, valor_total, status, data_pedido)
         VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
@@ -135,8 +142,8 @@ async getById(id) {
           UPDATE produto SET estoque = estoque - $1 WHERE id_produto = $2
         `, [item.quantidade, item.id_produto]);
       }
+      
       if (id_afiliacao) {
-       
         const afiliacaoRes = await client.query(`
           SELECT id_produto, percentual_comissao, status 
           FROM afiliacao_produto 
@@ -146,21 +153,16 @@ async getById(id) {
         if (afiliacaoRes.rows.length > 0) {
           const afiliacao = afiliacaoRes.rows[0];
 
-          // Só ganha se a afiliação já estiver APROVADA pelo Vendedor
           if (afiliacao.status === 'APROVADO') {
-            
-            // Procura nos itens do carrinho se o cliente realmente comprou o produto do afiliado
             let valorVendaAfiliado = 0;
             
             for (const item of itens) {
               if (item.id_produto === afiliacao.id_produto) {
                 const produtoAfiliado = await client.query(`SELECT preco FROM produto WHERE id_produto = $1`, [item.id_produto]);
-                // Calcula quanto o cliente gastou APENAS no produto indicado
                 valorVendaAfiliado += Number(produtoAfiliado.rows[0].preco) * Number(item.quantidade);
               }
             }
 
-            // Se o produto indicado estava no carrinho, cria a comissão!
             if (valorVendaAfiliado > 0) {
               const percentual = Number(afiliacao.percentual_comissao);
               const valorComissao = valorVendaAfiliado * (percentual / 100);

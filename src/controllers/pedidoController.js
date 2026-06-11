@@ -10,19 +10,18 @@ class PedidoController {
 
   async getAll(req, res) {
     try {
+      const { id_usuario } = req.query;
 
-      const pedidos = await PedidoDao.getAll();
+      const pedidos = await PedidoDao.getAll(id_usuario);
 
       res.status(200).json(pedidos);
 
     } catch (error) {
-
       console.error('Erro ao buscar pedidos:', error);
 
       res.status(500).json({
         error: 'Erro ao buscar pedidos'
       });
-
     }
   }
 

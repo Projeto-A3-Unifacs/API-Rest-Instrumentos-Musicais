@@ -12,6 +12,7 @@ class ClienteDao {
   }
 
 
+ 
   async getByUsuario(id) {
     const res = await pool.query(`
       SELECT * FROM usuario 
