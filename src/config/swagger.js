@@ -22,10 +22,15 @@ const swaggerOptions = {
    
     security: [{ bearerAuth: [] }],
   },
- 
-  apis: [path.join(__dirname, '../routes/*.js')],
+ apis: [
+  path.join(__dirname, '../routes/*.js').replace(/\\/g, '/')
+]
 };
+  console.log(
+  path.join(__dirname, '../routes/*.js')
+);
 
 const swaggerDocs = swaggerJSDoc(swaggerOptions);
+console.log(swaggerDocs.paths);
 
 module.exports = { swaggerUi, swaggerDocs };
