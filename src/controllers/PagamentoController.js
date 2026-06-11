@@ -1,4 +1,4 @@
-const pagamentoDAO = require('../dao/PagamentoDAO');
+const pagamentoDAO = require('../dao/PagamentoDao');
 const pedidoDAO = require('../dao/pedidoDao');
 
 class PagamentoController {
