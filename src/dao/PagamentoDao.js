@@ -1,6 +1,29 @@
 const pool = require('../config/Database');
 
 class PagamentoDAO {
+
+async getAll(idUsuario = null) {
+    if (idUsuario) {
+  
+      const res = await pool.query(`
+        SELECT p.* FROM pagamento p
+        JOIN pedido ped ON p.id_pedido = ped.id_pedido
+        WHERE ped.id_usuario = $1
+        ORDER BY p.data_pagamento DESC
+      `, [idUsuario]);
+      return res.rows;
+    }
+
+    // Se não passar ID, traz todos os pagamentos normalmente
+    const res = await pool.query(`SELECT * FROM pagamento ORDER BY data_pagamento DESC`);
+    return res.rows;
+  }
+  async getById(idPagamento) {
+    const res = await pool.query(`SELECT * FROM pagamento WHERE id_pagamento = $1`, [idPagamento]);
+    return res.rows[0];
+  }
+    
+
   async getByPedido(idPedido) {
     const res = await pool.query(`
       SELECT * FROM pagamento

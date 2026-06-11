@@ -31,7 +31,7 @@ class VendedorController {
     async create(req, res) {
         try {
             
-            const { nome, email, senha, cpf, telefone, data_nascimento, role } = req.body;
+            const { nome, email, senha, cpf, telefone, data_nascimento} = req.body;
 
             if (!nome || !email || !senha || !cpf) {
                 return res.status(400).json({ 
@@ -44,7 +44,7 @@ class VendedorController {
             }
 
             const novoVendedor = await vendedorDao.create({
-                nome, email, senha, cpf, telefone, data_nascimento, role
+                nome, email, senha, cpf, telefone, data_nascimento
             });
 
             res.status(201).json(novoVendedor);
@@ -65,16 +65,16 @@ class VendedorController {
                 return res.status(400).json({ error: 'O ID fornecido é inválido.' });
             }
 
-            const { nome, email, cpf, telefone, data_nascimento, role } = req.body;
+            const { nome, email, cpf, telefone, data_nascimento } = req.body;
 
-            if (!nome && !email && !cpf && !telefone && !data_nascimento && !role) {
+            if (!nome && !email && !cpf && !telefone && !data_nascimento ) {
                 return res.status(400).json({ 
                     error: 'Nenhum dado válido foi fornecido para atualização.' 
                 });
             }
 
             const updated = await vendedorDao.update(parseInt(id), {
-                nome, email, cpf, telefone, data_nascimento, role
+                nome, email, cpf, telefone, data_nascimento
             });
 
             if (!updated) {

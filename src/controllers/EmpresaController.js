@@ -32,7 +32,7 @@ class EmpresaController {
         return res.status(400).json({ error: 'Campos obrigatórios: razao_social, nome_fantasia, cnpj' });
       }
 
-      const id_usuario_responsavel = req.user.role === 'Administrador' && req.body.id_usuario_responsavel 
+      const id_usuario_responsavel = req.user.role === 'Vendedor' && req.body.id_usuario_responsavel 
         ? req.body.id_usuario_responsavel 
         : req.user.id;
 

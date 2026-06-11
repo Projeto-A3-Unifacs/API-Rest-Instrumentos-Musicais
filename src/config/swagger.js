@@ -1,5 +1,6 @@
 const swaggerJSDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const path = require('path')
 
 const swaggerOptions = {
   definition: {
@@ -18,11 +19,11 @@ const swaggerOptions = {
         },
       },
     },
-    // Aplica o cadeado de segurança como padrão para todas as rotas
+   
     security: [{ bearerAuth: [] }],
   },
-  // Diz ao Swagger para procurar a documentação dentro de todos os arquivos na pasta routes
-  apis: ['./routes/*.js'], 
+ 
+  apis: [path.join(__dirname, '../routes/*.js')],
 };
 
 const swaggerDocs = swaggerJSDoc(swaggerOptions);

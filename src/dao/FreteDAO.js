@@ -32,8 +32,10 @@ class FreteDAO {
     return res.rows[0];
   }
 
+ 
   async create(
     idPedido,
+    idProduto, 
     valor,
     prazoDias,
     cidadeOrigem,
@@ -45,6 +47,7 @@ class FreteDAO {
     const res = await pool.query(`
       INSERT INTO frete (
         id_pedido,
+        id_produto, 
         valor,
         prazo_dias,
         cidade_origem,
@@ -53,20 +56,12 @@ class FreteDAO {
         estado_destino,
         status
       )
-      VALUES (
-        $1,
-        $2,
-        $3,
-        $4,
-        $5,
-        $6,
-        $7,
-        'PENDENTE'
-      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'PENDENTE')
       RETURNING *
     `,
     [
       idPedido,
+      idProduto, 
       valor,
       prazoDias,
       cidadeOrigem,

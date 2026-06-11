@@ -19,7 +19,7 @@ const { login } = require('../controllers/authController');
  * properties:
  * email:
  * type: string
- * example: "joao@email.com"
+ * example: "joao_teste@email.com"
  * senha:
  * type: string
  * example: "123456"

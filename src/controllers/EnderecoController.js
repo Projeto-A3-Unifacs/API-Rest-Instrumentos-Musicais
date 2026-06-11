@@ -1,5 +1,6 @@
 const enderecoDAO = require('../dao/EnderecoDAO');
 const vendedorDao = require('../dao/vendedorDao');
+const clienteDao= require('../dao/clienteDao')
 
 class EnderecoController {
 
@@ -63,7 +64,7 @@ class EnderecoController {
 
       const id_usuario = req.user.id; // força criar para o usuário logado
 
-      const usuario = await vendedorDao.getById(id_usuario);
+      const usuario = await clienteDao.getById(id_usuario);
       if (!usuario) return res.status(404).json({ erro: 'Usuário não encontrado' });
 
       const endereco = await enderecoDAO.create(
@@ -80,6 +81,7 @@ class EnderecoController {
       res.status(201).json(endereco);
 
     } catch (error) {
+      
       res.status(500).json({ erro: error.message });
     }
   }

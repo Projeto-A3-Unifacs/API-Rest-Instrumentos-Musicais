@@ -1,4 +1,5 @@
 const pool = require('../config/Database');
+const bcrypt = require('bcryptjs');
 
 class ClienteDao {
   async getAll() {
@@ -18,15 +19,18 @@ class ClienteDao {
     return res.rows[0];
   }
 
-  async create(cliente) {
+
+ async create(cliente) {
     const { nome, email, senha, cpf, telefone, data_nascimento } = cliente;
     
-    // Força o id_perfil = 2 (Cliente) direto no insert
+    const salt = await bcrypt.genSalt(10);
+    const senhaCriptografada = await bcrypt.hash(senha, salt);
+
     const res = await pool.query(`
       INSERT INTO usuario (nome, email, senha, cpf, telefone, data_nascimento, data_cadastro, id_perfil)
       VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, 2)
       RETURNING *
-    `, [nome, email, senha, cpf, telefone, data_nascimento]);
+    `, [nome, email, senhaCriptografada, cpf, telefone, data_nascimento]);
     
     return res.rows[0];
   }

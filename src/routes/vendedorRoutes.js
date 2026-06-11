@@ -8,7 +8,7 @@ router.get('/', authenticate, authorize( 'Administrador'), vendedorController.ge
 
 router.get('/:id', authenticate, authorize('Vendedor', 'Administrador'), vendedorController.getById.bind(vendedorController));
 
-router.post('/', authenticate, authorize( 'Administrador'), vendedorController.create.bind(vendedorController));
+router.post('/',  vendedorController.create.bind(vendedorController));
 
 router.put('/:id', authenticate, authorize('Vendedor', 'Administrador'), vendedorController.update.bind(vendedorController));
 

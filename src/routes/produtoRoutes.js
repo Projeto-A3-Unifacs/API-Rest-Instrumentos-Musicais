@@ -3,7 +3,6 @@ const router = express.Router();
 const produtoController = require('../controllers/produtoController');
 const { authenticate, authorize } = require('../middleware/auth');
 
-// GET todos os produtos – clientes e vendedores podem acessar
 router.get('/', authenticate, authorize('Cliente', 'Vendedor', 'Administrador'), produtoController.getAll.bind(produtoController));
 
 // GET produto por ID – clientes e vendedores podem acessar

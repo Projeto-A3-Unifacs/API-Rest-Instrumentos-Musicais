@@ -9,32 +9,51 @@ class PedidoDao {
 
     return res.rows;
   }
+async getById(id) {
+    const pedido = await pool.query(`SELECT * FROM pedido WHERE id_pedido = $1`, [id]);
 
-  async getById(id) {
-    const pedido = await pool.query(`
-      SELECT * FROM pedido
-      WHERE id_pedido = $1
-    `, [id]);
-
-    if (!pedido.rows[0]) {
-      return null;
-    }
+    if (!pedido.rows[0]) return null;
 
     const itens = await pool.query(`
       SELECT 
         ip.id_item_pedido,
         ip.id_produto,
         p.nome AS produto,
+        e.nome_fantasia AS empresa_vendedora,
+        e.cidade AS cidade_origem,
+        e.estado AS estado_origem,
         ip.quantidade,
-        ip.preco_unitario
+        ip.preco_unitario,
+        (ip.quantidade * ip.preco_unitario) AS subtotal
       FROM item_pedido ip
       JOIN produto p ON p.id_produto = ip.id_produto
+      JOIN empresa e ON p.id_empresa = e.id_empresa
       WHERE ip.id_pedido = $1
     `, [id]);
 
+    const fretes = await pool.query(`
+      SELECT id_frete, id_produto, valor, prazo_dias, cidade_origem, estado_origem, status
+      FROM frete
+      WHERE id_pedido = $1
+    `, [id]);
+
+    const itensFormatados = itens.rows.map(item => {
+      const freteDoItem = fretes.rows.find(f => f.id_produto === item.id_produto);
+      
+      return {
+        ...item,
+        frete: freteDoItem ? {
+          id_frete: freteDoItem.id_frete,
+          valor: freteDoItem.valor,
+          prazo_dias: freteDoItem.prazo_dias,
+          status: freteDoItem.status
+        } : null
+      };
+    });
+
     return {
       ...pedido.rows[0],
-      itens: itens.rows
+      itens: itensFormatados, 
     };
   }
 

@@ -2,21 +2,7 @@ const express = require('express');
 const router = express.Router();
 const clienteController = require('../controllers/ClienteController');
 const { authenticate, authorize } = require('../middleware/auth');
-/**
- * @swagger
- * /clientes:
- * get:
- * summary: Lista todos os clientes cadastrados
- * tags: [Clientes]
- * responses:
- * 200:
- * description: Lista de clientes recuperada com sucesso
- * 401:
- * description: Token não fornecido ou inválido
- * 403:
- * description: Acesso negado para este perfil
- */
-router.get('/', clienteController.getAll.bind(clienteController));
+
 router.get('/', authenticate, authorize('Cliente', 'Administrador'), clienteController.getAll.bind(clienteController));
 router.get('/:id', authenticate, authorize('Cliente', 'Administrador'), clienteController.getById.bind(clienteController));
 /**
@@ -38,7 +24,7 @@ router.get('/:id', authenticate, authorize('Cliente', 'Administrador'), clienteC
  * example: "João Silva"
  * email:
  * type: string
- * example: "joao@email.com"
+ * example: "joao_teste@email.com"
  * senha:
  * type: string
  * example: "123456"
@@ -55,12 +41,7 @@ router.get('/:id', authenticate, authorize('Cliente', 'Administrador'), clienteC
  * responses:
  * 201:
  * description: Cliente cadastrado com sucesso
- * 400:
- * description: Erro de validação dos campos
- * 409:
- * description: Email ou CPF já cadastrados
  */
-router.post('/', clienteController.create.bind(clienteController));
 router.post('/', clienteController.create.bind(clienteController));
 router.put('/:id', authenticate, authorize('Cliente', 'Administrador'), clienteController.update.bind(clienteController));
 router.delete('/:id', authenticate, authorize('Cliente', 'Administrador'), clienteController.delete.bind(clienteController));

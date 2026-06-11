@@ -24,21 +24,16 @@ class vendedorDao {
     return res.rows[0];
   }
 
-  async getByEmail(email) {
-    const res = await pool.query(`
-      SELECT * FROM usuario WHERE email = $1
-    `, [email]);
-    return res.rows[0];
-  }
+
 
   async create(usuario) {
     const { nome, email, senha, cpf, telefone, data_nascimento, role } = usuario;
     const hashedPassword = await bcrypt.hash(senha, 10);
     const res = await pool.query(`
-      INSERT INTO usuario (nome, email, senha, cpf, telefone, data_nascimento, data_cadastro, id_perfil, role)
-      VALUES ($1,$2,$3,$4,$5,$6,CURRENT_TIMESTAMP,1,$7)
+      INSERT INTO usuario (nome, email, senha, cpf, telefone, data_nascimento, data_cadastro, id_perfil)
+      VALUES ($1,$2,$3,$4,$5,$6,CURRENT_TIMESTAMP,1)
       RETURNING *
-    `, [nome, email, hashedPassword, cpf, telefone, data_nascimento, role]);
+    `, [nome, email, hashedPassword, cpf, telefone, data_nascimento]);
     return res.rows[0];
   }
 

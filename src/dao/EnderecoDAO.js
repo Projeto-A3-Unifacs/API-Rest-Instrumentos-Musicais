@@ -72,7 +72,7 @@ class EnderecoDAO {
       cidade,
       estado
     ]);
-
+    console.log(idUsuario)
     return res.rows[0];
   }
 
