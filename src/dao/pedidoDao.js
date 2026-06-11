@@ -9,6 +9,24 @@ class PedidoDao {
 
     return res.rows;
   }
+
+
+
+ async getVendedorByPedido(idPedido) {
+    const res = await pool.query(`
+      SELECT DISTINCT e.id_usuario_responsavel
+      FROM item_pedido ip
+      JOIN produto p ON ip.id_produto = p.id_produto
+      JOIN empresa e ON p.id_empresa = e.id_empresa
+      WHERE ip.id_pedido = $1
+      LIMIT 1
+    `, [idPedido]);
+
+    return res.rows[0];
+  }
+
+
+
 async getById(id) {
     const pedido = await pool.query(`SELECT * FROM pedido WHERE id_pedido = $1`, [id]);
 
@@ -63,8 +81,7 @@ async getById(id) {
     try {
       await client.query('BEGIN');
 
-    
-      const { id_usuario, status = 'REALIZADO', itens, valor_frete = 0 } = pedido;
+      const { id_usuario, status = 'REALIZADO', itens, id_afiliacao } = pedido;
 
       if (!id_usuario) {
         throw new Error('O campo id_usuario é obrigatório');
@@ -73,14 +90,14 @@ async getById(id) {
       if (!itens || !Array.isArray(itens) || itens.length === 0) {
         throw new Error('O pedido precisa ter pelo menos um item');
       }
-      let valorTotal = Number(valor_frete);
+
+      let valorTotal = 0;
 
       for (const item of itens) {
         const produto = await client.query(`
           SELECT id_produto, preco, estoque
           FROM produto
           WHERE id_produto = $1
-          FOR UPDATE
         `, [item.id_produto]);
 
         if (!produto.rows[0]) {
@@ -104,37 +121,65 @@ async getById(id) {
 
       for (const item of itens) {
         const produto = await client.query(`
-          SELECT preco
-          FROM produto
-          WHERE id_produto = $1
+          SELECT preco FROM produto WHERE id_produto = $1
         `, [item.id_produto]);
 
         const precoUnitario = produto.rows[0].preco;
 
         await client.query(`
-          INSERT INTO item_pedido 
-          (id_pedido, id_produto, quantidade, preco_unitario)
+          INSERT INTO item_pedido (id_pedido, id_produto, quantidade, preco_unitario)
           VALUES ($1, $2, $3, $4)
-        `, [
-          idPedido,
-          item.id_produto,
-          item.quantidade,
-          precoUnitario
-        ]);
+        `, [idPedido, item.id_produto, item.quantidade, precoUnitario]);
 
         await client.query(`
-          UPDATE produto
-          SET estoque = estoque - $1
-          WHERE id_produto = $2
-        `, [
-          item.quantidade,
-          item.id_produto
-        ]);
+          UPDATE produto SET estoque = estoque - $1 WHERE id_produto = $2
+        `, [item.quantidade, item.id_produto]);
+      }
+      if (id_afiliacao) {
+       
+        const afiliacaoRes = await client.query(`
+          SELECT id_produto, percentual_comissao, status 
+          FROM afiliacao_produto 
+          WHERE id_afiliacao = $1
+        `, [id_afiliacao]);
+
+        if (afiliacaoRes.rows.length > 0) {
+          const afiliacao = afiliacaoRes.rows[0];
+
+          // Só ganha se a afiliação já estiver APROVADA pelo Vendedor
+          if (afiliacao.status === 'APROVADO') {
+            
+            // Procura nos itens do carrinho se o cliente realmente comprou o produto do afiliado
+            let valorVendaAfiliado = 0;
+            
+            for (const item of itens) {
+              if (item.id_produto === afiliacao.id_produto) {
+                const produtoAfiliado = await client.query(`SELECT preco FROM produto WHERE id_produto = $1`, [item.id_produto]);
+                // Calcula quanto o cliente gastou APENAS no produto indicado
+                valorVendaAfiliado += Number(produtoAfiliado.rows[0].preco) * Number(item.quantidade);
+              }
+            }
+
+            // Se o produto indicado estava no carrinho, cria a comissão!
+            if (valorVendaAfiliado > 0) {
+              const percentual = Number(afiliacao.percentual_comissao);
+              const valorComissao = valorVendaAfiliado * (percentual / 100);
+
+              await client.query(`
+                INSERT INTO comissao
+                (id_afiliacao, id_pedido, valor_venda, percentual, valor_comissao, status, data_registro)
+                VALUES ($1, $2, $3, $4, $5, 'PENDENTE', NOW())
+              `, [id_afiliacao, idPedido, valorVendaAfiliado, percentual, valorComissao]);
+              
+              console.log(`[SISTEMA] Comissão de R$ ${valorComissao} gerada com sucesso para a afiliação ${id_afiliacao}!`);
+            }
+          }
+        }
       }
 
       await client.query('COMMIT');
-
       return this.getById(idPedido);
+
     } catch (error) {
       await client.query('ROLLBACK');
       throw error;
@@ -142,7 +187,6 @@ async getById(id) {
       client.release();
     }
   }
-
   async update(id, data) {
     const camposPermitidos = ['id_usuario', 'valor_total', 'status'];
     const fields = [];

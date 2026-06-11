@@ -4,10 +4,9 @@ const clienteDao= require('../dao/clienteDao')
 
 class EnderecoController {
 
-  // GET todos os endereços – apenas vendedores
   async getAll(req, res) {
     try {
-      if (req.user.role !== Vendedor) {
+      if (req.user.role !== 'Administrador') {
         return res.status(403).json({ erro: 'Acesso negado' });
       }
 
@@ -19,7 +18,6 @@ class EnderecoController {
     }
   }
 
-  // GET endereço por ID – cliente só acessa se for o próprio, vendedor qualquer
   async getById(req, res) {
     try {
       const { id } = req.params;
@@ -37,8 +35,6 @@ class EnderecoController {
       res.status(500).json({ erro: error.message });
     }
   }
-
-  // GET endereços de um usuário específico – cliente só vê o próprio
   async getByUsuario(req, res) {
     try {
       const { idUsuario } = req.params;
@@ -55,16 +51,12 @@ class EnderecoController {
     }
   }
 
-  // POST criar endereço – apenas clientes podem criar para si
   async create(req, res) {
     try {
-      if (req.user.role !== 'Cliente') {
-        return res.status(403).json({ erro: 'Apenas clientes podem criar endereço' });
-      }
+      
+      const id_usuario = req.user.id; 
 
-      const id_usuario = req.user.id; // força criar para o usuário logado
-
-      const usuario = await clienteDao.getById(id_usuario);
+      const usuario = await clienteDao.getByUsuario(id_usuario);
       if (!usuario) return res.status(404).json({ erro: 'Usuário não encontrado' });
 
       const endereco = await enderecoDAO.create(
@@ -86,7 +78,6 @@ class EnderecoController {
     }
   }
 
-  // PUT atualizar endereço – apenas clientes podem atualizar seus próprios
   async update(req, res) {
     try {
       const { id } = req.params;
@@ -106,13 +97,9 @@ class EnderecoController {
     }
   }
 
-  // DELETE endereço – apenas vendedores podem deletar qualquer endereço
   async delete(req, res) {
     try {
-      if (req.user.role !== Vendedor) {
-        return res.status(403).json({ erro: 'Apenas vendedores podem remover endereços' });
-      }
-
+      
       const { id } = req.params;
       const removido = await enderecoDAO.delete(id);
       res.status(200).json({ sucesso: removido });

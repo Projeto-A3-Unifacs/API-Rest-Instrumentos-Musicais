@@ -1,12 +1,13 @@
 const carteiraDAO = require('../dao/CarteiraDAO');
-const vendedorDao = require('../dao/vendedorDao');
+const clienteDao = require('../dao/clienteDao');
+const afiliadoDAO = require('../dao/AfiliadoDAO')
 
 class CarteiraController {
 
-  // GET todas as carteiras – apenas vendedores
+ 
   async getAll(req, res) {
     try {
-      if (req.user.role !== Vendedor) {
+      if (req.user.role !== 'Administrador') {
         return res.status(403).json({ erro: 'Acesso negado' });
       }
 
@@ -18,7 +19,7 @@ class CarteiraController {
     }
   }
 
-  // GET carteira por ID – clientes só podem ver a própria
+ 
   async getById(req, res) {
     try {
       const { id } = req.params;
@@ -28,7 +29,6 @@ class CarteiraController {
         return res.status(404).json({ erro: 'Carteira não encontrada' });
       }
 
-      // Clientes só podem acessar sua própria carteira
       if (req.user.role === 'Cliente' && carteira.id_usuario !== req.user.id) {
         return res.status(403).json({ erro: 'Acesso negado' });
       }
@@ -39,28 +39,35 @@ class CarteiraController {
       res.status(500).json({ erro: error.message });
     }
   }
-
-  // POST criar carteira – apenas clientes podem criar a própria
   async create(req, res) {
     try {
-      if (req.user.role !== 'Cliente') {
-        return res.status(403).json({ erro: 'Apenas clientes podem criar carteira' });
-      }
+      const { id_usuario } = req.body;
 
-      // Sempre criar carteira para o usuário logado, ignorando id_usuario do body
-      const id_usuario = req.user.id;
+      const usuario = await clienteDAO.getByUsuario(id_usuario);
 
-      const usuario = await vendedorDao.getById(id_usuario);
       if (!usuario) {
         return res.status(404).json({ erro: 'Usuário não encontrado' });
       }
 
-      const carteiraExistente = await carteiraDAO.getByUsuario(id_usuario);
-      if (carteiraExistente) {
-        return res.status(400).json({ erro: 'Usuário já possui carteira' });
-      }
+      
+      if (usuario.id_perfil === 2) {
+        const afiliado = await afiliadoDAO.findByUsuario(id_usuario);
 
+        if (!afiliado) {
+          return res.status(403).json({ erro: 'Acesso negado: Clientes comuns não podem ter carteira. Torne-se um afiliado primeiro.' });
+        }
+
+        if (afiliado.status !== 'APROVADO') {
+          return res.status(403).json({ erro: 'Acesso negado: Sua solicitação de afiliado ainda está pendente ou foi rejeitada.' });
+        }
+      }
+      const carteiraExistente = await carteiraDAO.getByUsuario(id_usuario);
+
+      if (carteiraExistente) {
+        return res.status(400).json({ erro: 'Este usuário já possui uma carteira ativa.' });
+      }
       const carteira = await carteiraDAO.create(id_usuario);
+
       res.status(201).json(carteira);
 
     } catch (error) {
@@ -68,11 +75,10 @@ class CarteiraController {
     }
   }
 
-  // DELETE carteira – apenas vendedores podem remover
   async delete(req, res) {
     try {
-      if (req.user.role !== Vendedor) {
-        return res.status(403).json({ erro: 'Apenas vendedores podem remover carteiras' });
+      if (req.user.role !== 'Administrador') {
+        return res.status(403).json({ erro: 'Apenas Administradores podem remover carteiras' });
       }
 
       const { id } = req.params;

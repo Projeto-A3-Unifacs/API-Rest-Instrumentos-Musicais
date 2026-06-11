@@ -17,6 +17,17 @@ class AfiliadoDAO {
     return res.rows;
   }
 
+
+
+  async findByUsuario(idUsuario) {
+    const res = await pool.query(`
+      SELECT * FROM afiliado 
+      WHERE id_usuario = $1
+    `, [idUsuario]);
+
+    return res.rows[0];
+  }
+
   async findById(id) {
     const res = await pool.query(`
       SELECT

@@ -3,7 +3,6 @@ const carteiraDAO = require('../dao/CarteiraDAO');
 
 class SaqueController {
 
-  // GET todos os saques – apenas vendedores
   async getAll(req, res) {
     try {
       if (req.user.role !== Vendedor) {
@@ -18,7 +17,7 @@ class SaqueController {
     }
   }
 
-  // GET saque por ID – cliente só acessa o próprio, vendedor qualquer
+  
   async getById(req, res) {
     try {
       const { id } = req.params;
@@ -39,14 +38,10 @@ class SaqueController {
     }
   }
 
-  // POST criar saque – apenas clientes
   async create(req, res) {
     try {
-      if (req.user.role !== 'Cliente') {
-        return res.status(403).json({ erro: 'Apenas clientes podem criar saques' });
-      }
-
-      const id_carteira = req.user.id; // assume que cada cliente tem carteira vinculada ao usuário
+     
+      const id_carteira = req.user.id; 
       const { valor } = req.body;
 
       const carteira = await carteiraDAO.getById(id_carteira);
@@ -70,10 +65,9 @@ class SaqueController {
     }
   }
 
-  // PATCH aprovar/reprovar saque – apenas vendedores
   async updateStatus(req, res) {
     try {
-      if (req.user.role !== Vendedor) {
+      if (req.user.role !== 'Administrador') {
         return res.status(403).json({ erro: 'Apenas vendedores podem aprovar/reprovar saques' });
       }
 

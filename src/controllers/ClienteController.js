@@ -45,7 +45,7 @@ class ClienteController {
                 nome, email, senha, cpf, telefone, data_nascimento
             });
 
-            res.status(201).json(novoCliente);
+            res.status(201).json(novoCliente.id_perfil);
         } catch (e) {
             
             if (e.code === '23505') {

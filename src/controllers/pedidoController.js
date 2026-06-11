@@ -3,7 +3,9 @@ const FreteDao = require('../dao/FreteDAO');
 const EnderecoDAO = require('../dao/EnderecoDAO');
 const CarrinhoDAO = require('../dao/CarrinhoDAO');
 const PagamentoDAO = require('../dao/PagamentoDAO');
-
+const carteiraDAO = require('../dao/CarteiraDAO');
+const comissaoDAO = require('../dao/ComissaoDAO');
+const afiliacaoProdutoDAO = require('../dao/AfiliacaoProdutoDAO');
 class PedidoController {
 
   async getAll(req, res) {
@@ -34,16 +36,12 @@ class PedidoController {
         return res.status(404).json({ message: 'Pedido não encontrado' });
       }
       
-      // Trava de segurança para o cliente só ver o próprio pedido
       if (req.user.role === 'Cliente' && pedido.id_usuario !== req.user.id) {
         return res.status(403).json({ error: 'Acesso negado' });
       }
 
-      // AQUI NÓS USAMOS O MÉTODO ÓRFÃO!
-      // Buscamos os pagamentos atrelados a este pedido
       const pagamentos = await PagamentoDAO.getByPedido(id);
       
-      // Injetamos a lista de pagamentos no objeto do pedido antes de devolver pro usuário
       pedido.historico_pagamentos = pagamentos;
 
       res.status(200).json(pedido);
@@ -151,7 +149,6 @@ class PedidoController {
         );
       }
 
-      // Limpa o carrinho caso a compra tenha vindo dele
       if (usarCarrinho && carrinhoUsuario) {
         await CarrinhoDAO.clearCart(carrinhoUsuario.id_carrinho);
       }
@@ -171,39 +168,57 @@ class PedidoController {
   }
 
   async update(req, res) {
-
     try {
-
       const { id } = req.params;
+      const { status } = req.body;
 
-      const pedidoAtualizado =
-        await PedidoDao.update(
-          id,
-          req.body
-        );
+      const pedidoAntigo = await PedidoDao.getById(id);
 
-      if (!pedidoAtualizado) {
-        return res.status(404).json({
-          message:
-            'Pedido não encontrado para atualizar'
-        });
+      if (!pedidoAntigo) {
+        return res.status(404).json({ message: 'Pedido não encontrado para atualizar' });
       }
 
-      res.status(200).json(
-        pedidoAtualizado
-      );
+      const pedidoAtualizado = await PedidoDao.update(id, req.body);
+
+      
+      if (status === 'APROVADO' && pedidoAntigo.status !== 'APROVADO') {
+        
+        const valorTotal = Number(pedidoAtualizado.valor_total);
+        let valorVendedor = valorTotal;
+
+      
+        const comissoes = await comissaoDAO.getByPedido(id);
+
+        if (comissoes && comissoes.length > 0) {
+          const valorAfiliado = Number(comissoes[0].valor_comissao);
+          valorVendedor = valorVendedor - valorAfiliado;
+
+        
+          const dadosAfiliado = await afiliacaoProdutoDAO.getUsuarioByAfiliacao(comissoes[0].id_afiliacao);
+          
+          if (dadosAfiliado) {
+            const carteiraAfiliado = await carteiraDAO.getByUsuario(dadosAfiliado.id_usuario);
+            if (carteiraAfiliado) {
+              await carteiraDAO.adicionarSaldo(carteiraAfiliado.id_carteira, valorAfiliado);
+            }
+          }
+        }
+
+        const dadosVendedor = await PedidoDao.getVendedorByPedido(id);
+        
+        if (dadosVendedor) {
+          const carteiraVendedor = await carteiraDAO.getByUsuario(dadosVendedor.id_usuario_responsavel);
+          if (carteiraVendedor) {
+            await carteiraDAO.adicionarSaldo(carteiraVendedor.id_carteira, valorVendedor);
+          }
+        }
+      }
+
+      res.status(200).json(pedidoAtualizado);
 
     } catch (error) {
-
-      console.error(
-        'Erro ao atualizar pedido:',
-        error
-      );
-
-      res.status(400).json({
-        error: error.message
-      });
-
+      console.error('Erro ao atualizar pedido:', error);
+      res.status(400).json({ error: error.message });
     }
   }
 

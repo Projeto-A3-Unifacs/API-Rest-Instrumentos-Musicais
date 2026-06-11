@@ -1,7 +1,7 @@
 const RelatorioDao = require('../dao/relatorioDao');
 
 class RelatorioController {
-  // GET produtos mais vendidos – apenas vendedores
+
   async produtosMaisVendidos(req, res) {
     try {
       if (req.user.role !== 'Vendedor') {

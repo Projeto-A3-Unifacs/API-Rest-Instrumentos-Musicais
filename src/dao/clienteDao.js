@@ -11,6 +11,15 @@ class ClienteDao {
     return res.rows;
   }
 
+
+  async getByUsuario(id) {
+    const res = await pool.query(`
+      SELECT * FROM usuario 
+      WHERE id_usuario = $1
+    `, [id]);
+    return res.rows[0];
+  }
+
   async getById(id) {
     const res = await pool.query(`
       SELECT * FROM usuario 
@@ -36,7 +45,7 @@ class ClienteDao {
   }
 
   async update(id, data) {
-    // Evita que o perfil ou ID sejam alterados indevidamente
+   
     delete data.id_usuario;
     delete data.id_perfil;
 
@@ -54,7 +63,7 @@ class ClienteDao {
     
     values.push(id);
 
-    // Garante que só atualiza se for cliente
+    cliente
     const res = await pool.query(`
       UPDATE usuario
       SET ${fields.join(', ')}
@@ -66,7 +75,7 @@ class ClienteDao {
   }
 
   async delete(id) {
-    // Deleta garantindo que é um cliente
+   
     const res = await pool.query(`
       DELETE FROM usuario 
       WHERE id_usuario = $1 AND id_perfil = 2 

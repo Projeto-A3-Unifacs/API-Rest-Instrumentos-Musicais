@@ -25,6 +25,7 @@ class vendedorDao {
   }
 
 
+  
 
   async create(usuario) {
     const { nome, email, senha, cpf, telefone, data_nascimento, role } = usuario;

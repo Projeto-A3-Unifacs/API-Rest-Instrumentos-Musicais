@@ -78,6 +78,19 @@ class AfiliacaoProdutoDAO {
 
     return res.rows[0];
   }
+
+
+async getUsuarioByAfiliacao(idAfiliacao) {
+    const res = await pool.query(`
+      SELECT a.id_usuario
+      FROM afiliacao_produto ap
+      JOIN afiliado a ON ap.id_afiliado = a.id_afiliado
+      WHERE ap.id_afiliacao = $1
+    `, [idAfiliacao]);
+
+    return res.rows[0];
+  }
+
   async delete(id) {
     const res = await pool.query(`
       DELETE FROM afiliacao_produto
