@@ -4,9 +4,7 @@ class RelatorioController {
 
   async produtosMaisVendidos(req, res) {
     try {
-      if (req.user.role !== 'Vendedor') {
-        return res.status(403).json({ erro: 'Acesso negado' });
-      }
+      
 
       const relatorio = await RelatorioDao.produtosMaisVendidos();
       res.status(200).json(relatorio);
@@ -18,9 +16,7 @@ class RelatorioController {
   }
   async produtoPorCliente(req, res) {
     try {
-      if (req.user.role !== 'Vendedor') {
-        return res.status(403).json({ erro: 'Acesso negado' });
-      }
+      
 
       const relatorio = await RelatorioDao.produtoPorCliente();
       res.status(200).json(relatorio);
@@ -33,10 +29,7 @@ class RelatorioController {
 
   async consumoMedioCliente(req, res) {
     try {
-      if (req.user.role !== 'Vendedor') {
-        return res.status(403).json({ erro: 'Acesso negado' });
-      }
-
+      
       const relatorio = await RelatorioDao.consumoMedioCliente();
       res.status(200).json(relatorio);
 
@@ -46,12 +39,9 @@ class RelatorioController {
     }
   }
 
-  // GET produtos com baixo estoque – apenas vendedores
   async produtosBaixoEstoque(req, res) {
     try {
-      if (req.user.role !== 'Vendedor') {
-        return res.status(403).json({ erro: 'Acesso negado' });
-      }
+      
 
       const limite = req.query.limite ? Number(req.query.limite) : 5;
       const relatorio = await RelatorioDao.produtosBaixoEstoque(limite);
