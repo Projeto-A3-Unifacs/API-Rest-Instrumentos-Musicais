@@ -4,7 +4,7 @@ const afiliacaoProdutoController = require('../controllers/AfiliacaoProdutoContr
 const { authenticate, authorize } = require('../middleware/auth');
 
 
-router.get('/', authenticate, authorize('Vendedor', 'Administrador'), afiliacaoProdutoController.getAll.bind(afiliacaoProdutoController));
+router.get('/', authenticate, authorize('Vendedor', 'Administrador'), afiliacaoProdutoController.findAll.bind(afiliacaoProdutoController));
 
 
 router.get('/:id', authenticate, authorize('Cliente', 'Vendedor', 'Administrador'), afiliacaoProdutoController.getById.bind(afiliacaoProdutoController));

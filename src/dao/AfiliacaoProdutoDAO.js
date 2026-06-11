@@ -61,19 +61,23 @@ class AfiliacaoProdutoDAO {
     return res.rows[0];
   }
 
-  async updateStatus(id, status, percentual_comissao) {
+ async updateStatus(id, status, percentual_comissao) {
     const res = await pool.query(`
       UPDATE afiliacao_produto
       SET status = $1,
       data_aprovacao = CURRENT_TIMESTAMP,
-      percentual_comissao=$2
+      percentual_comissao = $2
       WHERE id_afiliacao = $3
       RETURNING *
-    `, [status, id , percentual_comissao]);
+    `, [status, percentual_comissao, id]); 
+
+  
+    if (res.rows.length === 0) {
+      throw new Error('Afiliação não encontrada');
+    }
 
     return res.rows[0];
   }
-
   async delete(id) {
     const res = await pool.query(`
       DELETE FROM afiliacao_produto

@@ -2,10 +2,9 @@ const afiliadoDAO = require('../dao/AfiliadoDAO');
 
 class AfiliadoController {
 
-  // GET todos afiliados – apenas vendedores
   async getAll(req, res) {
     try {
-      if (req.user.role !== Vendedor) {
+      if (req.user.role !== 'Administrador') {
         return res.status(403).json({ erro: 'Acesso negado' });
       }
 
@@ -17,7 +16,6 @@ class AfiliadoController {
     }
   }
 
-  // GET afiliado por ID – clientes só podem ver o próprio, vendedores todos
   async getById(req, res) {
     try {
       const { id } = req.params;
@@ -36,7 +34,6 @@ class AfiliadoController {
     }
   }
 
-  // POST criar afiliado – apenas clientes podem criar sua afiliação
   async create(req, res) {
     try {
       if (req.user.role !== 'Cliente') {
@@ -44,7 +41,7 @@ class AfiliadoController {
       }
 
       // verifica se já é afiliado
-      const existeAfiliado = await afiliadoDAO.getByUsuarioId(req.user.id);
+      const existeAfiliado = await afiliadoDAO.findById(req.user.id);
       if (existeAfiliado) {
         return res.status(400).json({ erro: 'Usuário já é afiliado' });
       }
@@ -57,12 +54,10 @@ class AfiliadoController {
       res.status(400).json({ erro: error.message });
     }
   }
-
-  // PATCH aprovar/reprovar – apenas vendedores
   async updateStatus(req, res) {
     try {
-      if (req.user.role !== Vendedor) {
-        return res.status(403).json({ erro: 'Apenas vendedores podem aprovar/reprovar' });
+      if (req.user.role !== 'Administrador') {
+        return res.status(403).json({ erro: 'Apenas Administradores podem aprovar/reprovar' });
       }
 
       const { id } = req.params;
@@ -76,11 +71,10 @@ class AfiliadoController {
     }
   }
 
-  // DELETE afiliado – apenas vendedores
   async delete(req, res) {
     try {
-      if (req.user.role !== Vendedor) {
-        return res.status(403).json({ erro: 'Apenas vendedores podem remover afiliados' });
+      if (req.user.role !== 'Administrador') {
+        return res.status(403).json({ erro: 'Apenas Administradores podem remover afiliados' });
       }
 
       const { id } = req.params;
