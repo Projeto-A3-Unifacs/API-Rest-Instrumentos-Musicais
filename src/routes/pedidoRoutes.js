@@ -6,11 +6,19 @@ const { authenticate, authorize } = require('../middleware/auth');
  * @swagger
  * /pedidos:
  *   get:
- *     summary: Lista todos os pedidos
+ *     summary: Lista pedidos
  *     tags:
  *       - Pedidos
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: id_usuario
+ *         required: false
+ *         schema:
+ *           type: integer
+ *         description: Filtra pedidos por usuário
+ *         example: 1
  *     responses:
  *       200:
  *         description: Lista de pedidos retornada com sucesso
@@ -18,29 +26,11 @@ const { authenticate, authorize } = require('../middleware/auth');
 router.get(
   '/',
   authenticate,
-  authorize('Vendedor', 'Administrador'),
+  authorize('Vendedor', 'Administrador', 'Cliente'),
   pedidoController.getAll.bind(pedidoController)
 );
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-router.get(
-  '/usuario/:idUsuario',
-  authenticate,
-  pedidoController.getByUsuario.bind(pedidoController)
-);
 
 /**
  * @swagger

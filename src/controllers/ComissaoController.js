@@ -2,14 +2,13 @@ const comissaoDAO = require('../dao/ComissaoDAO');
 
 class ComissaoController {
 
-  // GET todas as comissões – apenas vendedores
+ 
   async getAll(req, res) {
     try {
-      if (req.user.role !== Vendedor) {
-        return res.status(403).json({ erro: 'Acesso negado' });
-      }
-
-      const comissoes = await comissaoDAO.getAll();
+    
+       const { id_usuario } = req.query;
+  
+        const pedidos = await ComissaoDAO.getAll(id_usuario);
       res.status(200).json(comissoes);
 
     } catch (error) {
@@ -17,13 +16,9 @@ class ComissaoController {
     }
   }
 
-  // GET comissão por ID – apenas vendedores
   async getById(req, res) {
     try {
-      if (req.user.role !== Vendedor) {
-        return res.status(403).json({ erro: 'Acesso negado' });
-      }
-
+    
       const { id } = req.params;
       const comissao = await comissaoDAO.getById(id);
 
@@ -38,12 +33,10 @@ class ComissaoController {
     }
   }
 
-  // POST criar comissão – apenas vendedores
+  
   async create(req, res) {
     try {
-      if (req.user.role !== Vendedor) {
-        return res.status(403).json({ erro: 'Acesso negado' });
-      }
+      
 
       const { id_afiliacao, id_pedido, valor_venda, percentual } = req.body;
       const valorComissao = Number(valor_venda) * (Number(percentual) / 100);
@@ -63,12 +56,10 @@ class ComissaoController {
     }
   }
 
-  // PATCH aprovar/reprovar comissão – apenas vendedores
+  
   async updateStatus(req, res) {
     try {
-      if (req.user.role !== Vendedor) {
-        return res.status(403).json({ erro: 'Acesso negado' });
-      }
+      
 
       const { id } = req.params;
       const { status } = req.body;

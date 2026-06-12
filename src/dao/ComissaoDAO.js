@@ -2,7 +2,18 @@ const pool = require('../config/Database');
 
 class ComissaoDAO {
 
-  async getAll() {
+  async getAll(id_afiliacao=null) {
+
+
+
+      if (id_afiliacao) {
+      const res = await pool.query(
+        'SELECT * FROM comissao WHERE id_afiliacao = $1 ORDER BY id_comissao', 
+        [id_afiliacao]
+      );
+      return res.rows;
+    }
+
     const res = await pool.query(`
       SELECT *
       FROM comissao

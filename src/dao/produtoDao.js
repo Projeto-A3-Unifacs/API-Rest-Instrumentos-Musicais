@@ -25,14 +25,13 @@ class ProdutoDao {
   }
 
   async create(produto) {
-    // 1. Adicionamos descricao, marca e modelo na extração
+    
     const { nome, descricao, preco, estoque, marca, modelo, id_categoria, id_empresa } = produto;
 
     if (!nome || preco === undefined || estoque === undefined || !id_categoria || !id_empresa) {
       throw new Error('Campos obrigatórios: nome, preco, estoque, id_categoria e id_empresa');
     }
 
-    // 2. Atualizamos a query para inserir os novos campos
     const res = await pool.query(`
       INSERT INTO produto (nome, descricao, preco, estoque, marca, modelo, id_categoria, id_empresa)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -43,7 +42,7 @@ class ProdutoDao {
   }
 
   async update(id, data) {
-    // 3. Incluímos os novos campos na lista de permissões de atualização
+    
     const camposPermitidos = ['nome', 'descricao', 'preco', 'estoque', 'marca', 'modelo', 'id_categoria', 'id_empresa'];
     const fields = [];
     const values = [];

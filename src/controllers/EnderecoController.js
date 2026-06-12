@@ -39,10 +39,6 @@ class EnderecoController {
     try {
       const { idUsuario } = req.params;
 
-      if (req.user.role === 'Cliente' && Number(idUsuario) !== req.user.id) {
-        return res.status(403).json({ erro: 'Acesso negado' });
-      }
-
       const enderecos = await enderecoDAO.getByUsuario(idUsuario);
       res.status(200).json(enderecos);
 

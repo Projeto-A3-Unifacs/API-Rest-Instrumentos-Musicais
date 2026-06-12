@@ -20,7 +20,7 @@ const { authenticate, authorize } = require('../middleware/auth');
 router.get(
   '/',
   authenticate,
-  authorize('Vendedor', 'Administrador'),
+  authorize('Administrador', 'Cliente', 'Vendedor'),
   enderecoController.getAll.bind(enderecoController)
 );
 

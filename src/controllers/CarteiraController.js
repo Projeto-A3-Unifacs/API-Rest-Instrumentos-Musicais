@@ -29,9 +29,7 @@ class CarteiraController {
         return res.status(404).json({ erro: 'Carteira não encontrada' });
       }
 
-      if (req.user.role === 'Cliente' && carteira.id_usuario !== req.user.id) {
-        return res.status(403).json({ erro: 'Acesso negado' });
-      }
+      
 
       res.status(200).json(carteira);
 
@@ -41,7 +39,7 @@ class CarteiraController {
   }
   async create(req, res) {
     try {
-      const { id_usuario } = req.body;
+      const { id_usuario } = req.user.id;
 
       const usuario = await clienteDao.getByUsuario(id_usuario);
 

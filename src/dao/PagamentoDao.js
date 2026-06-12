@@ -14,7 +14,7 @@ async getAll(idUsuario = null) {
       return res.rows;
     }
 
-    // Se não passar ID, traz todos os pagamentos normalmente
+    
     const res = await pool.query(`SELECT * FROM pagamento ORDER BY data_pagamento DESC`);
     return res.rows;
   }
