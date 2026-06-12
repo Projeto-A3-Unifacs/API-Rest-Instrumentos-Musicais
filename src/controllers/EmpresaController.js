@@ -9,6 +9,23 @@ class EmpresaController {
     }
   }
 
+
+
+
+async getByUsuario(req, res) {
+      try {
+        const { idUsuario } = req.params;
+  
+  
+        const enderecos = await EmpresaDAO.getByUsuario(idUsuario);
+        res.status(200).json(enderecos);
+  
+      } catch (error) {
+        res.status(500).json({ erro: error.message });
+      }
+    }
+
+
   async getById(req, res) {
     try {
       const { id } = req.params;

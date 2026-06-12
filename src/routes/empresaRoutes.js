@@ -8,5 +8,10 @@ router.get('/:id', authenticate, authorize('Administrador', 'Vendedor'), empresa
 router.post('/', authenticate, authorize('Administrador', 'Vendedor'), empresaController.create.bind(empresaController));
 router.put('/:id', authenticate, authorize('Administrador', 'Vendedor'), empresaController.update.bind(empresaController));
 router.delete('/:id', authenticate, authorize('Administrador', 'Vendedor'), empresaController.delete.bind(empresaController));
-
+router.get(
+  '/usuario/:idUsuario',
+  authenticate,
+  authorize( 'Vendedor', 'Administrador', 'Cliente'),
+  empresaController.getByUsuario.bind(empresaController)
+);
 module.exports = router;

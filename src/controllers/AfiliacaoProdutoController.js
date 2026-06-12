@@ -33,27 +33,27 @@ class AfiliacaoProdutoController {
   }
 
  
-  async create(req, res) {
-    try {
-      if (req.user.role !== 'Cliente') {
-        return res.status(403).json({ erro: 'Apenas clientes podem solicitar afiliação' });
-      }
-
-     
-      const afiliado = await afiliadoDAO.findById(req.user.id);
-      if (afiliado) {
-        return res.status(400).json({ erro: 'Usuário já é afiliado' });
-      }
-
-      const { id_produto } = req.body;
-      const afiliacao = await afiliacaoProdutoDAO.create(req.user.id, id_produto);
-
-      res.status(201).json(afiliacao);
-    } catch (error) {
-      res.status(400).json({ erro: error.message });
+ async create(req, res) {
+  try {
+    if (req.user.role !== 'Cliente') {
+      return res.status(403).json({ erro: 'Apenas clientes podem solicitar afiliação' });
     }
-  }
 
+    const afiliado = await afiliadoDAO.findByUsuario(req.user.id);
+    
+    if (!afiliado) {
+      return res.status(400).json({ erro: 'O usuário precisa se tornar um afiliado antes de se afiliar a produtos.' });
+    }
+
+    const { id_produto } = req.body;
+    
+    const afiliacao = await afiliacaoProdutoDAO.create(afiliado.id_afiliado, id_produto);
+
+    res.status(201).json(afiliacao);
+  } catch (error) {
+    res.status(400).json({ erro: error.message });
+  }
+}
   
   async updateStatus(req, res) {
     try {

@@ -40,7 +40,6 @@ class AfiliadoController {
         return res.status(403).json({ erro: 'Apenas clientes podem se tornar afiliados' });
       }
 
-      // verifica se já é afiliado
       const existeAfiliado = await afiliadoDAO.findById(req.user.id);
       if (existeAfiliado) {
         return res.status(400).json({ erro: 'Usuário já é afiliado' });

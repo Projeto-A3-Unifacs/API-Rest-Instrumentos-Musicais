@@ -6,6 +6,20 @@ class EmpresaDAO {
     return res.rows;
   }
 
+
+
+    async getByUsuario(idUsuario) {
+    const res = await pool.query(`
+      SELECT *
+      FROM empresa
+      WHERE id_usuario = $1
+      ORDER BY id_endereco
+    `, [idUsuario]);
+
+    return res.rows;
+  }
+
+
   async getById(id) {
     const res = await pool.query(`SELECT * FROM empresa WHERE id_empresa = $1`, [id]);
     return res.rows[0];

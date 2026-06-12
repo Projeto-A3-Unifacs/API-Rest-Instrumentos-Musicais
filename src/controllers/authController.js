@@ -10,6 +10,7 @@ class AuthController {
       const { email, senha } = req.body;
       
       const user = await authDAO.getUsuarioByEmail(email);
+     
       if (!user) return res.status(404).json({ message: 'Usuário não encontrado' });
 
       const validPassword = await bcrypt.compare(senha, user.senha);

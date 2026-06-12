@@ -5,7 +5,7 @@ class SaqueController {
 
   async getAll(req, res) {
     try {
-      if (req.user.role !== Vendedor) {
+      if (req.user.role !== 'Administrador') {
         return res.status(403).json({ erro: 'Acesso negado' });
       }
 
@@ -39,31 +39,34 @@ class SaqueController {
   }
 
   async create(req, res) {
-    try {
-     
-      const id_carteira = req.user.id; 
-      const { valor } = req.body;
+  try {
+    const id_usuario = req.user.id; 
+    const { valor } = req.body;
 
-      const carteira = await carteiraDAO.getById(id_carteira);
-      if (!carteira) {
-        return res.status(404).json({ erro: 'Carteira não encontrada' });
-      }
-
-      if (valor <= 0) {
-        return res.status(400).json({ erro: 'Valor inválido' });
-      }
-
-      if (Number(carteira.saldo) < Number(valor)) {
-        return res.status(400).json({ erro: 'Saldo insuficiente' });
-      }
-
-      const saque = await saqueDAO.create(id_carteira, valor);
-      res.status(201).json(saque);
-
-    } catch (error) {
-      res.status(500).json({ erro: error.message });
+    const carteira = await carteiraDAO.getByUsuario(id_usuario);
+    
+    if (!carteira) {
+      return res.status(404).json({ erro: 'Carteira não encontrada' });
     }
+
+    if (valor <= 0) {
+      return res.status(400).json({ erro: 'Valor inválido' });
+    }
+
+    if (Number(carteira.saldo) < Number(valor)) {
+      return res.status(400).json({ erro: 'Saldo insuficiente' });
+    }
+
+    const saque = await saqueDAO.create(carteira.id_carteira, valor);
+    
+    await carteiraDAO.removerSaldo(carteira.id_carteira, valor);
+
+    res.status(201).json(saque);
+
+  } catch (error) {
+    res.status(500).json({ erro: error.message });
   }
+}
 
   async updateStatus(req, res) {
     try {

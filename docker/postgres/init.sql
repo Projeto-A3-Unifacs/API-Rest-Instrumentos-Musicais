@@ -165,3 +165,46 @@ CREATE TABLE IF NOT EXISTS pagamento (
   status VARCHAR(30) NOT NULL DEFAULT 'PENDENTE',
   data_pagamento TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+
+
+INSERT INTO categoria (id_categoria, nome) VALUES 
+  (2, 'Cordas'), 
+  (3, 'Teclas'), 
+  (4, 'Percussão'),
+  (5, 'Áudio e Gravação')
+ON CONFLICT (id_categoria) DO NOTHING;
+
+
+INSERT INTO usuario (id_usuario, nome, email, senha, cpf, telefone, id_perfil) VALUES 
+  (1, 'Carlos Vendedor', 'carlos@vendas.com', '$2b$10$318M85uh8kVmvWvJ.rCV5.hK0CLyAFvIW2W2bG0ca.mDPtkBuhHRO', '11111111111', '71999999991', 1),
+  (2, 'Ana Vendedora', 'ana@vendas.com', '$2b$10$318M85uh8kVmvWvJ.rCV5.hK0CLyAFvIW2W2bG0ca.mDPtkBuhHRO', '22222222222', '71999999992', 1),
+  (3, 'João Cliente', 'joao@cliente.com', '$2b$10$318M85uh8kVmvWvJ.rCV5.hK0CLyAFvIW2W2bG0ca.mDPtkBuhHRO', '33333333333', '71999999993', 2),
+  (4, 'Maria Cliente', 'maria@cliente.com', '$2b$10$318M85uh8kVmvWvJ.rCV5.hK0CLyAFvIW2W2bG0ca.mDPtkBuhHRO', '44444444444', '71999999994', 2),
+  (5, 'Pedro Cliente', 'pedro@cliente.com', '$2b$10$318M85uh8kVmvWvJ.rCV5.hK0CLyAFvIW2W2bG0ca.mDPtkBuhHRO', '55555555555', '71999999995', 2),
+  (6, 'Lucas Cliente', 'lucas@cliente.com', '$2b$10$318M85uh8kVmvWvJ.rCV5.hK0CLyAFvIW2W2bG0ca.mDPtkBuhHRO', '66666666666', '71999999996', 2),
+  (7, 'Julia Cliente', 'julia@cliente.com', '$2b$10$318M85uh8kVmvWvJ.rCV5.hK0CLyAFvIW2W2bG0ca.mDPtkBuhHRO', '77777777777', '71999999997', 2),
+  (8, 'Administrador do Sistema', 'admin@sistema.com', '$2b$10$318M85uh8kVmvWvJ.rCV5.hK0CLyAFvIW2W2bG0ca.mDPtkBuhHRO', '88888888888', '71999999998', 3);
+
+INSERT INTO empresa (id_empresa, razao_social, nome_fantasia, cnpj, cidade, estado, id_usuario_responsavel) VALUES 
+  (1, 'Musical Store Comércio LTDA', 'Musical Store', '12345678000199', 'Salvador', 'BA', 1),
+  (2, 'Acústica Instrumentos SA', 'Acústica e CIA', '98765432000188', 'São Paulo', 'SP', 2);
+
+
+INSERT INTO produto (id_produto, nome, descricao, preco, estoque, marca, modelo, id_categoria, id_empresa) VALUES 
+  (1, 'Violão Takamine GD30', 'Violão folk eletroacústico com timbre encorpado, perfeito para sertanejo.', 1200.00, 15, 'Takamine', 'GD30CE', 2, 1),
+  (2, 'Teclado Yamaha PSR-E373', 'Teclado arranjador de 61 teclas sensitivas, ideal para iniciantes e intermediários.', 1850.00, 8, 'Yamaha', 'PSR-E373', 3, 2),
+  (3, 'Bateria Pearl Export', 'Bateria acústica completa com pratos e ferragens, excelente ressonância.', 5200.00, 3, 'Pearl', 'EXX725S', 4, 1),
+  (4, 'Guitarra Fender Stratocaster', 'Guitarra clássica com timbre limpo e versátil.', 4500.00, 4, 'Fender', 'Player Stratocaster', 2, 2),
+  (5, 'Baixo Tagima TJB-4', 'Contrabaixo passivo de 4 cordas, excelente custo-benefício.', 1100.00, 10, 'Tagima', 'TJB-4 Woodstock', 2, 1),
+  (6, 'Violão Giannini Start', 'Violão acústico de nylon para iniciantes.', 450.00, 30, 'Giannini', 'N-14', 2, 2),
+  (7, 'Cajon FSA Standard', 'Cajon inclinado acústico, ótimo para shows intimistas.', 380.00, 12, 'FSA', 'Standard', 4, 1),
+  (8, 'Piano Digital Casio CDP-S110', 'Piano digital compacto de 88 teclas com ação de martelo.', 2600.00, 5, 'Casio', 'CDP-S110', 3, 2),
+  (9, 'Microfone Shure SM58', 'Microfone dinâmico vocal lendário, padrão da indústria.', 850.00, 20, 'Shure', 'SM58-LC', 5, 1),
+  (10, 'Ukulele Kalani Soprano', 'Ukulele Soprano de madeira mahogany.', 250.00, 20, 'Kalani', 'Soprano', 2, 2);
+
+
+SELECT setval('categoria_id_categoria_seq', (SELECT MAX(id_categoria) FROM categoria));
+SELECT setval('usuario_id_usuario_seq', (SELECT MAX(id_usuario) FROM usuario));
+SELECT setval('empresa_id_empresa_seq', (SELECT MAX(id_empresa) FROM empresa));
+SELECT setval('produto_id_produto_seq', (SELECT MAX(id_produto) FROM produto));

@@ -22,6 +22,26 @@ router.get(
   pedidoController.getAll.bind(pedidoController)
 );
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+router.get(
+  '/usuario/:idUsuario',
+  authenticate,
+  pedidoController.getByUsuario.bind(pedidoController)
+);
+
 /**
  * @swagger
  * /pedidos/{id}:

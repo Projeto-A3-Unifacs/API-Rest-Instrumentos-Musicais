@@ -43,7 +43,7 @@ class CarteiraController {
     try {
       const { id_usuario } = req.body;
 
-      const usuario = await clienteDAO.getByUsuario(id_usuario);
+      const usuario = await clienteDao.getByUsuario(id_usuario);
 
       if (!usuario) {
         return res.status(404).json({ erro: 'Usuário não encontrado' });

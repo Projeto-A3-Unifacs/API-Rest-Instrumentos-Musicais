@@ -31,6 +31,18 @@ async getAll(idUsuario = null) {
   }
 
 
+    async getByUsuario(idUsuario) {
+    const res = await pool.query(`
+      SELECT *
+      FROM pedido
+      WHERE id_usuario = $1
+      ORDER BY id_endereco
+    `, [idUsuario]);
+
+    return res.rows;
+  }
+
+
 
 async getById(id) {
     const pedido = await pool.query(`SELECT * FROM pedido WHERE id_pedido = $1`, [id]);
